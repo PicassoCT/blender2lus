@@ -78,6 +78,12 @@ class ExportLUS(bpy.types.Operator, ExportHelper):
         description="includes the bindpose adjustment function in exported file, typically useful once per model",
         default=True,
         )
+        
+    write_s3o = BoolProperty(
+        name="Export for s3o ",
+        description="Exports Animations for a s3o useable format. This does not allow for move_animations",
+        default=False,
+        )
 
     @classmethod
     def poll(cls, context):
@@ -201,8 +207,22 @@ class ExportLUS(bpy.types.Operator, ExportHelper):
                     for axis in kf[piece][channel].keys():
                         if (type(kf[piece][channel][axis]['target']).__name__=="float"):
                             axis_name = axes[channel][axis]
+                            Signum=""
+                            if write_s3o == True and axis_name =="x_axis" or axis_name == "z_axis":
+                                #inverting Signum
+                                Signum="-1*"
+                                #exchanging axis
+                                if  axis_name=="x_axis":
+                                    axis_name="z_axis"
+                                else:
+                                    axis_name="x_axis"
+                                    
+                            #Skipping if we write to s3o
+                            if write_s3o==True and props[channel]== "move":
+                                continue
+                            
                             file.write("\t\t\t{['c']='"+props[channel]+"',['p']="+piece+", ['a']="+axis_name+", ['t']=")
-                            file.write('%f' % kf[piece][channel][axis]['target']+", ['s']="+'%f' % kf[piece][channel][axis]['speed']+'},\n')                        
+                            file.write('%f' % kf[piece][channel][axis]['target']+", ['s']="+ Signum+'%f' % kf[piece][channel][axis]['speed']+'},\n')                        
 
             file.write("\t\t}\n\t},\n")
         file.write("}\n")
