@@ -214,7 +214,7 @@ class ExportLUS(bpy.types.Operator, ExportHelper):
                                 #exchanging axis
                                 if  axis_name=="x_axis":
                                     axis_name="z_axis"
-                                else:
+                                elif axis_name == "z_axis":
                                     axis_name="x_axis"
                                     
                             #Skipping if we write to s3o
